@@ -14,3 +14,7 @@ Browser plugin skill was unavailable; regular Playwright was used. Screenshots w
 No real personal records were used. Public sample is synthetic. No personal report deployment or social posting was performed.
 
 GitHub CI passed on the initial implementation commit, including the 28 UI checks on Ubuntu.
+
+## Prompt-first onboarding
+
+The README copyable natural-language prompt was exercised with actual Codex in a fresh isolated workspace, without `$dear-next`. To test unpublished changes, the prompt explicitly selected the local checkout instead of fetching the older remote README, and supplied a confirmed destination plus three synthetic records. Codex read README.md and INSTALL.md, installed the project-scoped skill, read its instructions, generated evidence-based JSON, validated it and rendered HTML. The resulting JSON was independently validated. The host had no file-opening tool and correctly returned a clickable HTML path rather than claiming to open it. Remote clone, missing-input questions and graphical opening were not end-to-end exercised by this smoke run. Claude authentication limitation remains unchanged.

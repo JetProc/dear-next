@@ -17,6 +17,8 @@ Help someone discover what their choices reveal about their year, then write a s
 - The AI host analyzes selected text under its own data handling policy. Local HTML rendering does **not** mean all analysis stays on the device. State this before processing new personal input.
 - Do not upload originals, results, or cards anywhere, install accounts, send messages, push files, or deploy a site. The user's request for a report is not permission to publish it.
 
+For first-time natural-language installation, the repository README points to INSTALL.md. After project-scoped installation, follow this same workflow directly; a host restart is only needed for later named-skill discovery. Confirm selected input and output location if not already provided.
+
 ## Workflow
 
 1. **Resolve scope.** Use the current local date. Default to the current year through today; explicitly show “올해 중간 회고 / YTD” before December 31. A requested past year ends December 31. Ask about the year only if ambiguous. Never invent future evidence dates.

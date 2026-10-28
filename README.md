@@ -4,32 +4,26 @@
 
 ![합성 데이터 화면](docs/demo.png)
 
-## 30초 데모
+## AI에게 이 문장만 보내세요
 
-Node.js 20+가 필요합니다. 실행에는 npm 설치, 별도 API 키나 서버가 필요 없습니다.
+Claude Code 또는 Codex에 아래를 복사하세요.
+
+> https://github.com/JetProc/dear-next 의 안내를 읽고 디어넥스트를 설치해서 올해의 나와 내년 계획을 만들어 줘. 사용할 기록과 저장할 폴더는 나와 확인하고, 완성된 결과를 열어 줘. 기록이 없으면 짧게 질문해 줘. 내 다른 대화는 찾지 말고, 결과를 인터넷에 공개하지 마.
+
+AI가 [설치부터 결과 열기까지의 안내](INSTALL.md)를 따라 진행합니다. 이미 고른 자료와 저장 폴더가 있다면 프롬프트 뒤에 함께 적어 주세요. 없다면 짧은 질문을 받거나 [기존 AI의 맥락 요약](skills/dear-next/references/bridge-prompt.md)을 검토해 전달하면 됩니다.
+
+파일과 명령을 실행할 수 있는 호스트, Node.js 20+, 설치 시 GitHub 연결이 필요합니다. 호스트의 로그인·권한 확인은 그대로 적용됩니다. AI가 파일을 열 수 없는 환경에서는 클릭할 HTML 경로를 제공합니다. 별도 API 키·서버·npm 설치는 필요하지 않습니다. Claude의 실제 분석 검증은 현재 테스트 환경의 로그인 부재로 완료하지 못했습니다.
+
+### 고급: 직접 설치하거나 데모 보기
 
 ```sh
 git clone https://github.com/JetProc/dear-next.git
 cd dear-next
 node skills/dear-next/scripts/cli.mjs demo
-```
-
-생성된 `.dear-next/demo.html`을 브라우저로 여세요. 모든 예시는 합성 데이터입니다.
-
-## 설치와 사용
-
-작업할 폴더를 직접 지정합니다. macOS에서 심볼릭 링크 경로 대신 실제 경로를 사용하세요.
-
-```sh
 node scripts/install.mjs --target both --dest /absolute/path/to/my-reflection
 ```
 
-Codex에는 `.agents/skills/dear-next`, Claude Code에는 `.claude/skills/dear-next`를 복사합니다. 기존 스킬은 덮어쓰지 않습니다. 해당 폴더에서 호스트를 다시 시작하세요.
-
-- Codex: `$dear-next 올해의 나와 내년 계획 만들어줘. 내가 선택한 .dear-next/context.md만 사용해.`
-- Claude Code: `/dear-next 올해의 나와 내년 계획 만들어줘. 내가 선택한 .dear-next/context.md만 사용해.`
-
-[맥락 브리지 프롬프트](skills/dear-next/references/bridge-prompt.md)를 기존 AI 대화에서 실행하고, 직접 검토한 요약만 전달할 수 있습니다. 스킬 설치가 모든 과거 대화나 기억에 접근할 권한을 주지는 않습니다. 자료가 없으면 세 가지 질문으로 시작합니다.
+`.dear-next/demo.html`은 합성 데모입니다. 설치기는 Codex의 `.agents/skills/dear-next`와 Claude Code의 `.claude/skills/dear-next`에 복사하며 기존 스킬은 덮어쓰지 않습니다. 다음 세션에서 `$dear-next` 또는 `/dear-next`로 호출할 수 있습니다. 첫 실행은 AI가 설치된 SKILL.md를 직접 읽어 이어갈 수 있습니다.
 
 ## 수정과 다시 만들기
 
