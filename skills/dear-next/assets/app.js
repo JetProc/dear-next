@@ -33,6 +33,11 @@
     $('art-year').textContent = report.year;
     $('edition-label').textContent = `${report.year} · MY YEAR, IN LETTERS`;
     $('private-label').textContent = report.synthetic ? 'SYNTHETIC DEMO · 가상 기록' : '나만의 기록 · 개인 파일';
+    $('draft-notice').textContent = report.synthetic
+      ? '예시 / 아직 내 기록으로 분석하지 않은 결과입니다. 원하면 AI 대화에 기록을 붙여 넣어 나의 초안을 만들어 보세요. 질문에 답하는 것은 선택입니다.'
+      : report.evidence.length < 3
+        ? '적은 기록으로 만든 제한적인 초안입니다. 관찰한 내용과 조심스러운 해석을 구분해 읽고, 원하면 AI에 기록을 더하거나 내 말로 고쳐 주세요.'
+        : '제공된 기록으로 만든 초안입니다. 원하면 기록을 더하거나 내 말로 고쳐 주세요.';
     const ytd = report.asOf !== `${report.year}-12-31`;
     $('range').textContent = `${report.year}.01.01 — ${report.asOf.replaceAll('-', '.')} ${ytd ? '· 올해 중간 회고 (YTD)' : '· 한 해의 회고'}`;
     $('coverage').textContent = report.coverage;
@@ -101,7 +106,7 @@
     if (lastDialogTrigger) lastDialogTrigger.focus();
   }));
   function updateShare() {
-    const selected = { year: report.year };
+    const selected = { year: report.year, synthetic: report.synthetic };
     if ($('share-title-check').checked) selected.title = report.title;
     if ($('share-words-check').checked) selected.words = [...report.words];
     if ($('share-intention-check').checked) selected.intention = report.plan.direction;
@@ -200,7 +205,9 @@
   }
   function apply() {
     try {
-      report = editedReport(); render();
+      const candidate = editedReport();
+      if (report.synthetic && !candidate.synthetic) throw new Error('예시는 개인 분석으로 바꿀 수 없습니다. AI에 내 기록을 제공해 새 리포트를 만들어 주세요.');
+      report = candidate; render();
       $('edit-json').value = JSON.stringify(report, null, 2);
       $('editor-error').textContent = '';
       $('editor-status').textContent = '수정을 적용했습니다. 새로고침 전 수정 JSON을 저장하세요.';

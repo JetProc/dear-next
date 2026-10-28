@@ -1,5 +1,5 @@
 /** A separate allowlist-only artifact. Never pass a Report object to this function.
- * @param {{year:number, title?:string, words?:string[], intention?:string}} selected
+ * @param {{year:number, synthetic?:boolean, title?:string, words?:string[], intention?:string}} selected
  * @returns {string}
  */
 export function makeShareSVG(selected) {
@@ -22,5 +22,5 @@ export function makeShareSVG(selected) {
 ${lines(title, 590, 72, 53)}
 ${lines(wrap((selected.words || []).join(' · '), 40), 1015, 28, 22)}
 ${lines(intent, 1090, 31, 24)}
-<text x="72" y="1300" font-size="20">올해의 나에게서, 다음 해의 나에게.</text></g></svg>`;
+<text x="72" y="1300" font-size="20">${selected.synthetic ? '합성 예시 · 개인 기록 분석이 아닙니다' : '올해의 나에게서, 다음 해의 나에게.'}</text></g></svg>`;
 }

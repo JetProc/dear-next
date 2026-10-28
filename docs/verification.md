@@ -15,6 +15,14 @@ No real personal records were used. Public sample is synthetic. No personal repo
 
 GitHub CI passed on the initial implementation commit, including the 28 UI checks on Ubuntu.
 
-## Prompt-first onboarding
+## Earlier prompt-first onboarding (before draft-first update)
 
 The README copyable natural-language prompt was exercised with actual Codex in a fresh isolated workspace, without `$dear-next`. To test unpublished changes, the prompt explicitly selected the local checkout instead of fetching the older remote README, and supplied a confirmed destination plus three synthetic records. Codex read README.md and INSTALL.md, installed the project-scoped skill, read its instructions, generated evidence-based JSON, validated it and rendered HTML. The resulting JSON was independently validated. The host had no file-opening tool and correctly returned a clickable HTML path rather than claiming to open it. Remote clone, missing-input questions and graphical opening were not end-to-end exercised by this smoke run. Claude authentication limitation remains unchanged.
+
+## Draft-first update
+
+The current onboarding no longer requires an interview. Available authorized context produces a draft; sparse context is labeled limited/tentative; no context produces an explicitly synthetic example with optional follow-up. Explicit folder-confirmation requests and host permissions still take precedence.
+
+Actual Codex smoke with no records and no chosen destination read the selected unpublished source, created a fresh default child folder, installed the Codex skill, generated the example, verified its JSON and returned a local link without asking interview questions. No other conversations were searched. The first response and result explicitly said this was not personal analysis. This smoke used a local source override; remote cloning was tested separately in the earlier release.
+
+All 15 core tests and 36 browser tests passed locally. UI coverage includes sufficient synthetic records, one-record tentative personal drafts and no-record example presentation. New tests assert persistent example labeling in SVG export and rejection of converting a synthetic report to personal by changing its JSON flag in the editor. PNG uses the same labeled SVG bytes. Earlier full-context live Codex analysis remains applicable; sparse-context behavior was tested with fixtures rather than another live model call. A user can manually alter files outside the app; this is not a tamper-proof provenance system.

@@ -108,3 +108,27 @@ test('accessibility automated checks: report, share, editor', async ({ page }) =
   await page.keyboard.press('Escape'); await page.locator('#open-editor').click();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
+
+test('draft-first examples remain labeled in export and cannot become personal by editing', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#draft-notice')).toContainText('아직 내 기록으로 분석하지 않은');
+  await page.locator('#open-share').click();
+  await page.locator('#share-title-check').check(); await page.locator('#share-confirm').check();
+  const pending = page.waitForEvent('download'); await page.locator('#download-svg').click();
+  expect(readFileSync(await (await pending).path(), 'utf8')).toContain('합성 예시 · 개인 기록 분석이 아닙니다');
+  await page.keyboard.press('Escape'); await page.locator('#open-editor').click();
+  await page.locator('.json-details summary').click();
+  const data = JSON.parse(await page.locator('#edit-json').inputValue()); data.synthetic = false;
+  await page.locator('#edit-json').fill(JSON.stringify(data)); await page.locator('#apply-edit').click();
+  await expect(page.locator('#editor-error')).toContainText('예시는 개인 분석으로 바꿀 수 없습니다');
+});
+
+test('sparse personal context shows limits and an optional improvement path', async ({ page }) => {
+  const data = makeStarter(2025, '2025-12-31');
+  data.evidence = [{ id: 'e1', source: '합성 테스트 답변', date: '2025-03-12', excerpt: '산책하니 좋았다.' }];
+  data.discoveries = [{ id: 'd1', title: '산책에서 느낀 편안함', body: '한 번의 관찰입니다.', confidence: 'tentative', evidence: ['e1'], counterpoint: '' }];
+  const file = `${evidenceDir}/sparse-${test.info().project.name}.html`; writeFileSync(file, renderReport(data));
+  await page.goto(`file://${file}`);
+  await expect(page.locator('#draft-notice')).toContainText('제한적인 초안');
+  await expect(page.locator('.confidence')).toContainText('조심스러운 해석');
+});
