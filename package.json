@@ -1,0 +1,28 @@
+{
+  "name": "dear-next",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A private, evidence-led year in review. One skill, one offline keepsake.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "demo": "node skills/dear-next/scripts/cli.mjs demo",
+    "build": "node scripts/build.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "test:ui": "playwright test",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^22.18.0",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "typescript": "^5.9.3"
+  }
+}

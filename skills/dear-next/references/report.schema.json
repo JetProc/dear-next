@@ -1,0 +1,325 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dear Next report v1",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 2000,
+      "maximum": 2200
+    },
+    "asOf": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "coverage": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "subtitle": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "words": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 16
+      },
+      "minItems": 0,
+      "maxItems": 3
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "date": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "excerpt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 700
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "date",
+          "excerpt"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "maxItems": 40
+    },
+    "discoveries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 700
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "supported",
+              "tentative",
+              "conflicted"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "minItems": 0,
+            "maxItems": 20
+          },
+          "counterpoint": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "body",
+          "confidence",
+          "evidence",
+          "counterpoint"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "maxItems": 6
+    },
+    "keep": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "why": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "minItems": 0,
+            "maxItems": 20
+          }
+        },
+        "required": [
+          "title",
+          "why",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "maxItems": 4
+    },
+    "change": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "why": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "minItems": 0,
+            "maxItems": 20
+          }
+        },
+        "required": [
+          "title",
+          "why",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "maxItems": 4
+    },
+    "plan": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 150
+        },
+        "why": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "minItems": 0,
+          "maxItems": 20
+        },
+        "firstMonth": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "firstWeek": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "why": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40,
+                  "pattern": "^[a-z0-9-]+$"
+                },
+                "minItems": 0,
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "title",
+              "why",
+              "evidence"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "direction",
+        "why",
+        "evidence",
+        "firstMonth",
+        "firstWeek"
+      ],
+      "additionalProperties": false
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 400
+      },
+      "minItems": 0,
+      "maxItems": 8
+    }
+  },
+  "required": [
+    "version",
+    "year",
+    "asOf",
+    "synthetic",
+    "coverage",
+    "title",
+    "subtitle",
+    "words",
+    "evidence",
+    "discoveries",
+    "keep",
+    "change",
+    "plan",
+    "limitations"
+  ],
+  "additionalProperties": false
+}

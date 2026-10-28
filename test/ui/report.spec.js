@@ -1,0 +1,110 @@
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { makeDemo, makeStarter } from '../../skills/dear-next/scripts/demo.mjs';
+import { renderReport } from '../../skills/dear-next/scripts/render.mjs';
+
+const evidenceDir = '/tmp/dear-next-qa';
+mkdirSync(evidenceDir, { recursive: true });
+
+test('identity, no blank/overlay, console, no network, responsive screenshots', async ({ page }, info) => {
+  const errors = []; const requests = [];
+  page.on('pageerror', e => errors.push(e.message));
+  page.on('console', msg => { if (['error', 'warning'].includes(msg.type())) errors.push(msg.text()); });
+  page.on('request', request => requests.push(request.url()));
+  await page.goto('/');
+  await expect(page).toHaveTitle(/나의 한 해 — Dear Next/);
+  await expect(page.locator('h1')).toContainText('조금 덜 채우고');
+  await expect(page.locator('.discovery')).toHaveCount(3);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: `${evidenceDir}/${info.project.name}-first.png` });
+  await page.screenshot({ path: `${evidenceDir}/${info.project.name}-full.png`, fullPage: true });
+  expect(errors).toEqual([]);
+  expect(requests.filter(url => !url.startsWith('http://127.0.0.1:4173/'))).toEqual([]);
+});
+test('discovery disclosure and repeat actions work with keyboard', async ({ page }) => {
+  await page.goto('/');
+  const first = page.locator('.discovery').first();
+  await first.locator('summary').focus(); await page.keyboard.press('Enter');
+  await expect(first.locator('.evidence').first()).toBeVisible();
+  await page.keyboard.press('Enter'); await expect(first).not.toHaveAttribute('open', '');
+  const check = page.locator('.week-check input').first();
+  await check.check(); await expect(check).toBeChecked(); await check.uncheck(); await expect(check).not.toBeChecked();
+});
+test('share allowlist: actual preview, confirmation reset, SVG download, no evidence', async ({ page }, info) => {
+  await page.addInitScript(() => {
+    const create = URL.createObjectURL.bind(URL); window.__previewBlobs = new Map();
+    URL.createObjectURL = blob => { const url = create(blob); window.__previewBlobs.set(url, blob); return url; };
+  });
+  await page.goto('/'); await page.locator('#open-share').click();
+  await expect(page.locator('#share-dialog')).toBeVisible();
+  await expect(page.locator('#share-title-check')).not.toBeChecked();
+  await expect(page.locator('#download-card')).toBeDisabled();
+  await page.locator('#share-title-check').check(); await page.locator('#share-confirm').check();
+  await expect(page.locator('#download-card')).toBeEnabled();
+  await page.locator('#share-words-check').check();
+  await expect(page.locator('#share-confirm')).not.toBeChecked();
+  await expect(page.locator('#download-card')).toBeDisabled();
+  await page.locator('#share-confirm').check();
+  await expect(page.locator('#share-image')).toHaveJSProperty('complete', true);
+  await page.screenshot({ path: `${evidenceDir}/${info.project.name}-share.png`, fullPage: true });
+  const preview = await page.locator('#share-image').getAttribute('src');
+  const previewText = await page.evaluate(async url => window.__previewBlobs.get(url).text(), preview);
+  const pending = page.waitForEvent('download'); await page.locator('#download-svg').click();
+  const download = await pending; const bytes = readFileSync(await download.path(), 'utf8');
+  expect(bytes).toBe(previewText); expect(bytes).toContain('조금 덜 채우고');
+  expect(bytes).not.toContain('넓히기보다'); expect(bytes).not.toContain('가상 일기'); expect(bytes).not.toContain('excerpt');
+  await expect(page.locator('#download-card')).toBeDisabled();
+  await page.locator('#share-confirm').check();
+  const pngPending = page.waitForEvent('download'); await page.locator('#download-card').click();
+  const png = readFileSync(await (await pngPending).path());
+  expect(png.subarray(1, 4).toString()).toBe('PNG'); expect(png.readUInt32BE(16)).toBe(1080); expect(png.readUInt32BE(20)).toBe(1350);
+  await page.keyboard.press('Escape'); await expect(page.locator('#share-dialog')).not.toBeVisible();
+  await expect(page.locator('#open-share')).toBeFocused();
+});
+test('edit, download JSON, invalid import, and honest refresh semantics', async ({ page }) => {
+  await page.goto('/'); await page.locator('#open-editor').click();
+  await page.locator('#edit-title').fill('내가 고친 나의 한 해 & <나>');
+  await page.locator('#apply-edit').click(); await expect(page.locator('h1')).toHaveText('내가 고친 나의 한 해 & <나>');
+  const pending = page.waitForEvent('download'); await page.locator('#save-json').click();
+  const download = await pending; const saved = JSON.parse(readFileSync(await download.path(), 'utf8'));
+  expect(saved.title).toBe('내가 고친 나의 한 해 & <나>');
+  await page.locator('.json-details summary').click();
+  await page.locator('#edit-json').fill('{'); await page.locator('#apply-edit').click();
+  await expect(page.locator('#editor-error')).toContainText('JSON 형식');
+  await expect(page.locator('h1')).toHaveText('내가 고친 나의 한 해 & <나>');
+  await page.keyboard.press('Escape'); await page.reload();
+  await expect(page.locator('h1')).toContainText('조금 덜 채우고');
+  await page.locator('#open-editor').click(); await page.locator('.json-details summary').click();
+  await page.locator('#import-json').setInputFiles({ name: 'edited.report.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(saved)) });
+  await expect(page.locator('#edit-title')).toHaveValue(saved.title);
+  await page.locator('#apply-edit').click(); await expect(page.locator('h1')).toHaveText(saved.title);
+});
+test('offline local file and HTML injection remain safe', async ({ page, context }) => {
+  const report = makeDemo(); report.title = '</script><img src=x onerror="window.PWN=1"> 한글 🪴';
+  const file = `${evidenceDir}/injection-${test.info().project.name}.html`; writeFileSync(file, renderReport(report));
+  await context.setOffline(true); await page.goto(`file://${file}`);
+  await expect(page.locator('h1')).toHaveText(report.title);
+  expect(await page.evaluate(() => window.PWN)).toBeUndefined();
+  expect(await page.locator('h1 img').count()).toBe(0);
+  await page.locator('#open-share').click(); await page.locator('#share-title-check').check();
+  await expect(page.locator('#share-image')).toHaveJSProperty('complete', true);
+});
+test('empty report, maximum content, and reduced motion are readable', async ({ page }) => {
+  const report = makeStarter(2025, '2025-12-31');
+  const file = `${evidenceDir}/empty-${test.info().project.name}.html`; writeFileSync(file, renderReport(report));
+  await page.emulateMedia({ reducedMotion: 'reduce' }); await page.goto(`file://${file}`);
+  await expect(page.locator('.empty')).toContainText('아직 나를 설명할 기록');
+  await expect(page.locator('#next-year')).toHaveText('To. 2026');
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe('auto');
+  await page.locator('#open-editor').click(); await page.locator('#edit-title').fill('가'.repeat(100)); await page.locator('#apply-edit').click(); await page.keyboard.press('Escape');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+test('accessibility automated checks: report, share, editor', async ({ page }) => {
+  await page.goto('/');
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.locator('#open-share').click();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.keyboard.press('Escape'); await page.locator('#open-editor').click();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+});
